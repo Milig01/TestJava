@@ -12,31 +12,20 @@ pipeline {
                 sh './mvnw clean install' //или ./gradlew clean build если gradle
             }
         }
-       stage('Test') {
+        stage('Docker Build and Push') {
             steps {
-                sh './mvnw test' //или ./gradlew test если gradle
+                script {
+                    dockerImage = docker.build("TestJava:${BUILD_NUMBER}", ".")  // Замените на свое имя образа
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
+                        dockerImage.push()
+                    }
+                }
             }
-         }
-        stage('Docker Build') {
-          steps {
-           script {
-            dockerImage = docker.build("TestJava:${BUILD_NUMBER}", "./") // Замените image name
-            }
-          }
-        }
-       stage('Docker Push') {
-          steps {
-           script {
-             docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
-               dockerImage.push()
-             }
-            }
-          }
         }
     }
-  post {
-   always {
-      cleanWs()
-     }
-   }
+    post {
+        always {
+            cleanWs()
+        }
+    }
 }
