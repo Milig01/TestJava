@@ -9,6 +9,7 @@ pipeline {
         }
         stage('Build') {
             steps {
+                sh 'chmod +x mvnw' // Only on Unix-like systems!
                 sh './mvnw clean install' //или ./gradlew clean build если gradle
             }
         }
